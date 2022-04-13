@@ -270,6 +270,7 @@ set(files
   __iterator/iterator_traits.h
   __iterator/mergeable.h
   __iterator/move_iterator.h
+  __iterator/move_sentinel.h
   __iterator/next.h
   __iterator/ostream_iterator.h
   __iterator/ostreambuf_iterator.h
@@ -371,8 +372,10 @@ set(files
   __ranges/empty_view.h
   __ranges/enable_borrowed_range.h
   __ranges/enable_view.h
+  __ranges/filter_view.h
   __ranges/iota_view.h
   __ranges/join_view.h
+  __ranges/lazy_split_view.h
   __ranges/non_propagating_cache.h
   __ranges/owning_view.h
   __ranges/range_adaptor.h

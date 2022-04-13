@@ -117,6 +117,8 @@ Bug Fixes
   `C++20 [dcl.fct.def.general]p2 <https://timsong-cpp.github.io/cppwp/n4868/dcl.fct.def#general-2.sentence-3>`_,
   Clang should not diagnose incomplete types in function definitions if the function body is "= delete;".
   This fixes Issue `Issue 52802 <https://github.com/llvm/llvm-project/issues/52802>`_.
+- Unknown type attributes with a ``[[]]`` spelling are no longer diagnosed twice.
+  This fixes Issue `Issue 54817 <https://github.com/llvm/llvm-project/issues/54817>`_.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -142,6 +144,10 @@ Improvements to Clang's diagnostics
   cases where the deprecated declarations or definitions of a function without
   a prototype will change behavior in C2x. This diagnostic is grouped under the
   ``-Wstrict-prototypes`` warning group, but is enabled by default.
+- Clang now appropriately issues an error in C when a definition of a function
+  without a prototype and with no arguments is an invalid redeclaration of a
+  function with a prototype. e.g., ``void f(int); void f() {}`` is now properly
+  diagnosed.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -241,6 +247,9 @@ C++2b Feature Support
 - Implemented `P2128R6: Multidimensional subscript operator <https://wg21.link/P2128R6>`_.
 - Implemented `P0849R8: auto(x): decay-copy in the language <https://wg21.link/P0849R8>`_.
 - Implemented `P2242R3: Non-literal variables (and labels and gotos) in constexpr functions	<https://wg21.link/P2242R3>`_.
+- Implemented `P2036R3: Change scope of lambda trailing-return-type <https://wg21.link/P2036R3>`_.
+  This proposal modifies how variables captured in lambdas can appear in trailing return type
+  expressions and how their types are deduced therein, in all C++ language versions.
 
 CUDA Language Changes in Clang
 ------------------------------
