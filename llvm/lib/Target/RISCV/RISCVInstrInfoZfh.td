@@ -31,6 +31,12 @@ def riscv_fmv_x_signexth
 // Operand and SDNode transformation definitions.
 //===----------------------------------------------------------------------===//
 
+def ZfhExt           : ExtInfo<0, [HasStdExtZfh]>;
+def Zfh64Ext         : ExtInfo<0, [HasStdExtZfh,             IsRV64]>;
+def ZfhminExt        : ExtInfo<0, [HasStdExtZfhOrZfhmin]>;
+
+def ZfhminDExt       : ExtInfo<0, [HasStdExtZfhOrZfhmin,     HasStdExtD]>;
+
 def H     : ExtInfo_r<ZfhExt,     FPR16>;
 
 def HH        : ExtInfo_rr<ZfhExt,           FPR16,    FPR16>;
@@ -107,19 +113,19 @@ defm FCVT_WU_H : FPUnaryOp_r_frm_m<0b1100010, 0b00001, [XH], "fcvt.wu.h">,
                  Sched<[WriteFCvtF16ToI32, ReadFCvtF16ToI32]>;
 defm           : FPUnaryOpDynFrmAlias_m<FCVT_WU_H, "fcvt.wu.h", [XH]>;
 
-defm FCVT_H_W : FPUnaryOp_r_frm_m<0b1101010, 0b00000, HXINX, "fcvt.h.w">,
+defm FCVT_H_W : FPUnaryOp_r_frm_m<0b1101010, 0b00000, [HX], "fcvt.h.w">,
                 Sched<[WriteFCvtI32ToF16, ReadFCvtI32ToF16]>;
-defm          : FPUnaryOpDynFrmAlias_m<FCVT_H_W, "fcvt.h.w", HXINX>;
+defm          : FPUnaryOpDynFrmAlias_m<FCVT_H_W, "fcvt.h.w", [HX]>;
 
-defm FCVT_H_WU : FPUnaryOp_r_frm_m<0b1101010, 0b00001, HXINX, "fcvt.h.wu">,
+defm FCVT_H_WU : FPUnaryOp_r_frm_m<0b1101010, 0b00001, [HX], "fcvt.h.wu">,
                  Sched<[WriteFCvtI32ToF16, ReadFCvtI32ToF16]>;
-defm           : FPUnaryOpDynFrmAlias_m<FCVT_H_WU, "fcvt.h.wu", HXINX>;
+defm           : FPUnaryOpDynFrmAlias_m<FCVT_H_WU, "fcvt.h.wu", [HX]>;
 
-defm FCVT_H_S : FPUnaryOp_r_frm_m<0b0100010, 0b00000, HFINXmin, "fcvt.h.s">,
+defm FCVT_H_S : FPUnaryOp_r_frm_m<0b0100010, 0b00000, [HFmin], "fcvt.h.s">,
                 Sched<[WriteFCvtF32ToF16, ReadFCvtF32ToF16]>;
-defm          : FPUnaryOpDynFrmAlias_m<FCVT_H_S, "fcvt.h.s", HFINXmin>;
+defm          : FPUnaryOpDynFrmAlias_m<FCVT_H_S, "fcvt.h.s", [HFmin]>;
 
-defm FCVT_S_H : FPUnaryOp_r_m<0b0100000, 0b00010, 0b000, FHINXmin, "fcvt.s.h">,
+defm FCVT_S_H : FPUnaryOp_r_m<0b0100000, 0b00010, 0b000, [FHmin], "fcvt.s.h">,
                Sched<[WriteFCvtF16ToF32, ReadFCvtF16ToF32]>;
 
 let Predicates = [HasStdExtZfhOrZfhmin] in {
@@ -195,17 +201,6 @@ def PseudoQuietFLE_H : PseudoQuietFCMP<FPR16>;
 def PseudoQuietFLT_H : PseudoQuietFCMP<FPR16>;
 }
 } // Predicates = [HasStdExtZfhOrZfhmin]
-
-let Predicates = [HasStdExtZhinx] in {
-def : InstAlias<"fmv.h $rd, $rs",  (FSGNJ_H_INX  FPR16INX:$rd, FPR16INX:$rs, FPR16INX:$rs)>;
-def : InstAlias<"fabs.h $rd, $rs", (FSGNJX_H_INX FPR16INX:$rd, FPR16INX:$rs, FPR16INX:$rs)>;
-def : InstAlias<"fneg.h $rd, $rs", (FSGNJN_H_INX FPR16INX:$rd, FPR16INX:$rs, FPR16INX:$rs)>;
-
-def : InstAlias<"fgt.h $rd, $rs, $rt",
-                (FLT_H_INX GPR:$rd, FPR16INX:$rt, FPR16INX:$rs), 0>;
-def : InstAlias<"fge.h $rd, $rs, $rt",
-                (FLE_H_INX GPR:$rd, FPR16INX:$rt, FPR16INX:$rs), 0>;
-} // Predicates = [HasStdExtZhinx]
 
 //===----------------------------------------------------------------------===//
 // Pseudo-instructions and codegen patterns
