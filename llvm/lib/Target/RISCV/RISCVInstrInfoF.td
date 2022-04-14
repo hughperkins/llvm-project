@@ -277,20 +277,24 @@ defm : FPFMADynFrmAlias_m<FMSUB_S,  "fmsub.s",  [F]>;
 defm : FPFMADynFrmAlias_m<FNMSUB_S, "fnmsub.s", [F]>;
 defm : FPFMADynFrmAlias_m<FNMADD_S, "fnmadd.s", [F]>;
 
+let Predicates = [HasStdExtF] in {
+
 let SchedRW = [WriteFALU32, ReadFALU32, ReadFALU32] in {
-defm FADD_S : FPALU_rr_frm_m<0b0000000, "fadd.s", [F]>;
-defm FSUB_S : FPALU_rr_frm_m<0b0000100, "fsub.s", [F]>;
+def FADD_S : FPALU_rr_frm<0b0000000, "fadd.s", FPR32>;
+def FSUB_S : FPALU_rr_frm<0b0000100, "fsub.s", FPR32>;
 }
 let SchedRW = [WriteFMul32, ReadFMul32, ReadFMul32] in
-defm FMUL_S : FPALU_rr_frm_m<0b0001000, "fmul.s", [F]>;
+def FMUL_S : FPALU_rr_frm<0b0001000, "fmul.s", FPR32>;
 
 let SchedRW = [WriteFDiv32, ReadFDiv32, ReadFDiv32] in
-defm FDIV_S : FPALU_rr_frm_m<0b0001100, "fdiv.s", [F]>;
+def FDIV_S : FPALU_rr_frm<0b0001100, "fdiv.s", FPR32>;
 
-defm : FPALUDynFrmAlias_m<FADD_S, "fadd.s", [F]>;
-defm : FPALUDynFrmAlias_m<FSUB_S, "fsub.s", [F]>;
-defm : FPALUDynFrmAlias_m<FMUL_S, "fmul.s", [F]>;
-defm : FPALUDynFrmAlias_m<FDIV_S, "fdiv.s", [F]>;
+def : FPALUDynFrmAlias<FADD_S, "fadd.s", FPR32>;
+def : FPALUDynFrmAlias<FSUB_S, "fsub.s", FPR32>;
+def : FPALUDynFrmAlias<FMUL_S, "fmul.s", FPR32>;
+def : FPALUDynFrmAlias<FDIV_S, "fdiv.s", FPR32>;
+
+} // Predicates = [HasStdExtF]
 
 defm FSQRT_S : FPUnaryOp_r_frm_m<0b0101100, 0b00000, [FF], "fsqrt.s">,
                Sched<[WriteFSqrt32, ReadFSqrt32]>;
