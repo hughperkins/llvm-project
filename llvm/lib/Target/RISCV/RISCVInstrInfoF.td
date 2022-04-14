@@ -9,6 +9,9 @@
 // This file describes the RISC-V instructions from the standard 'F',
 // Single-Precision Floating-Point instruction set extension.
 //
+// Remnants of original merge of Zfinx into this file remain. However Zfinx
+// is now in a separate file RISCVInstrInfoZfinx.td
+//
 //===----------------------------------------------------------------------===//
 
 //===----------------------------------------------------------------------===//
@@ -57,30 +60,15 @@ def riscv_any_fcvt_wu_rv64 : PatFrags<(ops node:$src, node:$frm),
 // Operand and SDNode transformation definitions.
 //===----------------------------------------------------------------------===//
 
-// Zfinx
-
-def GPRAsFPR : AsmOperandClass {
-  let Name = "GPRAsFPR";
-  let ParserMethod = "parseGPRAsFPR";
-  let RenderMethod = "addRegOperands";
-}
-
-def FPR32INX : RegisterOperand<GPRF32> {
-  let ParserMatchClass = GPRAsFPR;
-  let DecoderMethod = "DecodeGPRRegisterClass";
-}
+// these definitions can be simplified to remove Suffix and Space, which are always
+// empty string. However I found it too hard to remove these for now, so left them
+// be for the time being. We can clean these up later.
 
 // inx = 0 : f, d, zfh, zfhmin
-//     = 1 : zfinx, zdinx, zhinx, zhinxmin
-//     = 2 : zdinx_rv32
 class ExtInfo<bits<2> inx, list<Predicate> pres> {
-  string Suffix = !cond(!eq(inx, 0): "",
-                        !eq(inx, 1): "_INX",
-                        !eq(inx, 2): "_IN32X");
+  string Suffix = !cond(!eq(inx, 0): "");
   list<Predicate> Predicates = pres;
-  string Space = !cond(!eq(inx, 0): "",
-                       !eq(inx, 1): "RVZfinx",
-                       !eq(inx, 2): "RV32Zdinx");
+  string Space = !cond(!eq(inx, 0): "");
 }
 
 class ExtInfo_r<ExtInfo ext, DAGOperand reg> {
@@ -100,29 +88,14 @@ class ExtInfo_rr<ExtInfo ext, DAGOperand rdty, DAGOperand rs1ty> {
 
 def FExt       : ExtInfo<0, [HasStdExtF]>;
 def F64Ext     : ExtInfo<0, [HasStdExtF, IsRV64]>;
-def ZfinxExt   : ExtInfo<1, [HasStdExtZfinx]>;
-def Zfinx64Ext : ExtInfo<1, [HasStdExtZfinx, IsRV64]>;
 
 def F      : ExtInfo_r<FExt,     FPR32>;
-def F_INX  : ExtInfo_r<ZfinxExt, FPR32INX>;
 
 def FF        : ExtInfo_rr<FExt,       FPR32,    FPR32>;
-def FF_INX    : ExtInfo_rr<ZfinxExt,   FPR32INX, FPR32INX>;
 def FX        : ExtInfo_rr<FExt,       FPR32,    GPR>;
-def FX_INX    : ExtInfo_rr<ZfinxExt,   FPR32INX, GPR>;
 def FX_64     : ExtInfo_rr<F64Ext,     FPR32,    GPR>;
-def FX_INX_64 : ExtInfo_rr<Zfinx64Ext, FPR32INX, GPR>;
 def XF        : ExtInfo_rr<FExt,       GPR,      FPR32>;
 def XF_64     : ExtInfo_rr<F64Ext,     GPR,      FPR32>;
-def XF_INX    : ExtInfo_rr<ZfinxExt,   GPR,      FPR32INX>;
-def XF_INX_64 : ExtInfo_rr<Zfinx64Ext, GPR,      FPR32INX>;
-
-defvar FINX    = [F,     F_INX];
-defvar FFINX   = [FF,    FF_INX];
-defvar FXINX   = [FX,    FX_INX];
-defvar XFINX   = [XF,    XF_INX];
-defvar XFIN64X = [XF_64, XF_INX_64];
-defvar FXIN64X = [FX_64, FX_INX_64];
 
 // Floating-point rounding mode
 
@@ -293,97 +266,97 @@ def FSW : FPStore_r<0b010, "fsw", FPR32, WriteFST32>;
 } // Predicates = [HasStdExtF]
 
 let SchedRW = [WriteFMA32, ReadFMA32, ReadFMA32, ReadFMA32] in {
-defm FMADD_S  : FPFMA_rrr_frm_m<OPC_MADD,  0b00, "fmadd.s",  FINX>;
-defm FMSUB_S  : FPFMA_rrr_frm_m<OPC_MSUB,  0b00, "fmsub.s",  FINX>;
-defm FNMSUB_S : FPFMA_rrr_frm_m<OPC_NMSUB, 0b00, "fnmsub.s", FINX>;
-defm FNMADD_S : FPFMA_rrr_frm_m<OPC_NMADD, 0b00, "fnmadd.s", FINX>;
+defm FMADD_S  : FPFMA_rrr_frm_m<OPC_MADD,  0b00, "fmadd.s",  [F]>;
+defm FMSUB_S  : FPFMA_rrr_frm_m<OPC_MSUB,  0b00, "fmsub.s",  [F]>;
+defm FNMSUB_S : FPFMA_rrr_frm_m<OPC_NMSUB, 0b00, "fnmsub.s", [F]>;
+defm FNMADD_S : FPFMA_rrr_frm_m<OPC_NMADD, 0b00, "fnmadd.s", [F]>;
 }
 
-defm : FPFMADynFrmAlias_m<FMADD_S,  "fmadd.s",  FINX>;
-defm : FPFMADynFrmAlias_m<FMSUB_S,  "fmsub.s",  FINX>;
-defm : FPFMADynFrmAlias_m<FNMSUB_S, "fnmsub.s", FINX>;
-defm : FPFMADynFrmAlias_m<FNMADD_S, "fnmadd.s", FINX>;
+defm : FPFMADynFrmAlias_m<FMADD_S,  "fmadd.s",  [F]>;
+defm : FPFMADynFrmAlias_m<FMSUB_S,  "fmsub.s",  [F]>;
+defm : FPFMADynFrmAlias_m<FNMSUB_S, "fnmsub.s", [F]>;
+defm : FPFMADynFrmAlias_m<FNMADD_S, "fnmadd.s", [F]>;
 
 let SchedRW = [WriteFALU32, ReadFALU32, ReadFALU32] in {
-defm FADD_S : FPALU_rr_frm_m<0b0000000, "fadd.s", FINX>;
-defm FSUB_S : FPALU_rr_frm_m<0b0000100, "fsub.s", FINX>;
+defm FADD_S : FPALU_rr_frm_m<0b0000000, "fadd.s", [F]>;
+defm FSUB_S : FPALU_rr_frm_m<0b0000100, "fsub.s", [F]>;
 }
 let SchedRW = [WriteFMul32, ReadFMul32, ReadFMul32] in
-defm FMUL_S : FPALU_rr_frm_m<0b0001000, "fmul.s", FINX>;
+defm FMUL_S : FPALU_rr_frm_m<0b0001000, "fmul.s", [F]>;
 
 let SchedRW = [WriteFDiv32, ReadFDiv32, ReadFDiv32] in
-defm FDIV_S : FPALU_rr_frm_m<0b0001100, "fdiv.s", FINX>;
+defm FDIV_S : FPALU_rr_frm_m<0b0001100, "fdiv.s", [F]>;
 
-defm : FPALUDynFrmAlias_m<FADD_S, "fadd.s", FINX>;
-defm : FPALUDynFrmAlias_m<FSUB_S, "fsub.s", FINX>;
-defm : FPALUDynFrmAlias_m<FMUL_S, "fmul.s", FINX>;
-defm : FPALUDynFrmAlias_m<FDIV_S, "fdiv.s", FINX>;
+defm : FPALUDynFrmAlias_m<FADD_S, "fadd.s", [F]>;
+defm : FPALUDynFrmAlias_m<FSUB_S, "fsub.s", [F]>;
+defm : FPALUDynFrmAlias_m<FMUL_S, "fmul.s", [F]>;
+defm : FPALUDynFrmAlias_m<FDIV_S, "fdiv.s", [F]>;
 
-defm FSQRT_S : FPUnaryOp_r_frm_m<0b0101100, 0b00000, FFINX, "fsqrt.s">,
+defm FSQRT_S : FPUnaryOp_r_frm_m<0b0101100, 0b00000, [FF], "fsqrt.s">,
                Sched<[WriteFSqrt32, ReadFSqrt32]>;
-defm         : FPUnaryOpDynFrmAlias_m<FSQRT_S, "fsqrt.s", FFINX>;
+defm         : FPUnaryOpDynFrmAlias_m<FSQRT_S, "fsqrt.s", [FF]>;
 
 let SchedRW = [WriteFSGNJ32, ReadFSGNJ32, ReadFSGNJ32],
     mayRaiseFPException = 0 in {
-defm FSGNJ_S  : FPALU_rr_m<0b0010000, 0b000, "fsgnj.s",  FINX>;
-defm FSGNJN_S : FPALU_rr_m<0b0010000, 0b001, "fsgnjn.s", FINX>;
-defm FSGNJX_S : FPALU_rr_m<0b0010000, 0b010, "fsgnjx.s", FINX>;
+defm FSGNJ_S  : FPALU_rr_m<0b0010000, 0b000, "fsgnj.s",  [F]>;
+defm FSGNJN_S : FPALU_rr_m<0b0010000, 0b001, "fsgnjn.s", [F]>;
+defm FSGNJX_S : FPALU_rr_m<0b0010000, 0b010, "fsgnjx.s", [F]>;
 }
 
 let SchedRW = [WriteFMinMax32, ReadFMinMax32, ReadFMinMax32] in {
-defm FMIN_S   : FPALU_rr_m<0b0010100, 0b000, "fmin.s", FINX>;
-defm FMAX_S   : FPALU_rr_m<0b0010100, 0b001, "fmax.s", FINX>;
+defm FMIN_S   : FPALU_rr_m<0b0010100, 0b000, "fmin.s", [F]>;
+defm FMAX_S   : FPALU_rr_m<0b0010100, 0b001, "fmax.s", [F]>;
 }
 
-defm FCVT_W_S : FPUnaryOp_r_frm_m<0b1100000, 0b00000, XFINX, "fcvt.w.s">,
+defm FCVT_W_S : FPUnaryOp_r_frm_m<0b1100000, 0b00000, [XF], "fcvt.w.s">,
                 Sched<[WriteFCvtF32ToI32, ReadFCvtF32ToI32]>;
-defm          : FPUnaryOpDynFrmAlias_m<FCVT_W_S, "fcvt.w.s", XFINX>;
+defm          : FPUnaryOpDynFrmAlias_m<FCVT_W_S, "fcvt.w.s", [XF]>;
 
-defm FCVT_WU_S : FPUnaryOp_r_frm_m<0b1100000, 0b00001, XFINX, "fcvt.wu.s">,
+defm FCVT_WU_S : FPUnaryOp_r_frm_m<0b1100000, 0b00001, [XF], "fcvt.wu.s">,
                  Sched<[WriteFCvtF32ToI32, ReadFCvtF32ToI32]>;
-defm           : FPUnaryOpDynFrmAlias_m<FCVT_WU_S, "fcvt.wu.s", XFINX>;
+defm           : FPUnaryOpDynFrmAlias_m<FCVT_WU_S, "fcvt.wu.s", [XF]>;
 
 let mayRaiseFPException = 0 in
 def FMV_X_W : FPUnaryOp_r<0b1110000, 0b00000, 0b000, GPR, FPR32, "fmv.x.w">,
               Sched<[WriteFMovF32ToI32, ReadFMovF32ToI32]>;
 
 let SchedRW = [WriteFCmp32, ReadFCmp32, ReadFCmp32] in {
-defm FEQ_S : FPCmp_rr_m<0b1010000, 0b010, "feq.s", FINX>;
-defm FLT_S : FPCmp_rr_m<0b1010000, 0b001, "flt.s", FINX>;
-defm FLE_S : FPCmp_rr_m<0b1010000, 0b000, "fle.s", FINX>;
+defm FEQ_S : FPCmp_rr_m<0b1010000, 0b010, "feq.s", [F]>;
+defm FLT_S : FPCmp_rr_m<0b1010000, 0b001, "flt.s", [F]>;
+defm FLE_S : FPCmp_rr_m<0b1010000, 0b000, "fle.s", [F]>;
 }
 
 let mayRaiseFPException = 0 in
-defm FCLASS_S : FPUnaryOp_r_m<0b1110000, 0b00000, 0b001, XFINX, "fclass.s">,
+defm FCLASS_S : FPUnaryOp_r_m<0b1110000, 0b00000, 0b001, [XF], "fclass.s">,
                 Sched<[WriteFClass32, ReadFClass32]>;
 
-defm FCVT_S_W : FPUnaryOp_r_frm_m<0b1101000, 0b00000, FXINX, "fcvt.s.w">,
+defm FCVT_S_W : FPUnaryOp_r_frm_m<0b1101000, 0b00000, [FX], "fcvt.s.w">,
                 Sched<[WriteFCvtI32ToF32, ReadFCvtI32ToF32]>;
-defm          : FPUnaryOpDynFrmAlias_m<FCVT_S_W, "fcvt.s.w", FXINX>;
+defm          : FPUnaryOpDynFrmAlias_m<FCVT_S_W, "fcvt.s.w", [FX]>;
 
-defm FCVT_S_WU : FPUnaryOp_r_frm_m<0b1101000, 0b00001, FXINX, "fcvt.s.wu">,
+defm FCVT_S_WU : FPUnaryOp_r_frm_m<0b1101000, 0b00001, [FX], "fcvt.s.wu">,
                  Sched<[WriteFCvtI32ToF32, ReadFCvtI32ToF32]>;
-defm           : FPUnaryOpDynFrmAlias_m<FCVT_S_WU, "fcvt.s.wu", FXINX>;
+defm           : FPUnaryOpDynFrmAlias_m<FCVT_S_WU, "fcvt.s.wu", [FX]>;
 
 let mayRaiseFPException = 0 in
 def FMV_W_X : FPUnaryOp_r<0b1111000, 0b00000, 0b000, FPR32, GPR, "fmv.w.x">,
               Sched<[WriteFMovI32ToF32, ReadFMovI32ToF32]>;
 
-defm FCVT_L_S  : FPUnaryOp_r_frm_m<0b1100000, 0b00010, XFIN64X, "fcvt.l.s">,
+defm FCVT_L_S  : FPUnaryOp_r_frm_m<0b1100000, 0b00010, [XF_64], "fcvt.l.s">,
                  Sched<[WriteFCvtF32ToI64, ReadFCvtF32ToI64]>;
-defm           : FPUnaryOpDynFrmAlias_m<FCVT_L_S, "fcvt.l.s", XFIN64X>;
+defm           : FPUnaryOpDynFrmAlias_m<FCVT_L_S, "fcvt.l.s", [XF_64]>;
 
-defm FCVT_LU_S  : FPUnaryOp_r_frm_m<0b1100000, 0b00011, XFIN64X, "fcvt.lu.s">,
+defm FCVT_LU_S  : FPUnaryOp_r_frm_m<0b1100000, 0b00011, [XF_64], "fcvt.lu.s">,
                   Sched<[WriteFCvtF32ToI64, ReadFCvtF32ToI64]>;
-defm            : FPUnaryOpDynFrmAlias_m<FCVT_LU_S, "fcvt.lu.s", XFIN64X>;
+defm            : FPUnaryOpDynFrmAlias_m<FCVT_LU_S, "fcvt.lu.s", [XF_64]>;
 
-defm FCVT_S_L : FPUnaryOp_r_frm_m<0b1101000, 0b00010, FXIN64X, "fcvt.s.l">,
+defm FCVT_S_L : FPUnaryOp_r_frm_m<0b1101000, 0b00010, [XF_64], "fcvt.s.l">,
                 Sched<[WriteFCvtI64ToF32, ReadFCvtI64ToF32]>;
-defm          : FPUnaryOpDynFrmAlias_m<FCVT_S_L, "fcvt.s.l", FXIN64X>;
+defm          : FPUnaryOpDynFrmAlias_m<FCVT_S_L, "fcvt.s.l", [XF_64]>;
 
-defm FCVT_S_LU : FPUnaryOp_r_frm_m<0b1101000, 0b00011, FXIN64X, "fcvt.s.lu">,
+defm FCVT_S_LU : FPUnaryOp_r_frm_m<0b1101000, 0b00011, [XF_64], "fcvt.s.lu">,
                  Sched<[WriteFCvtI64ToF32, ReadFCvtI64ToF32]>;
-defm           : FPUnaryOpDynFrmAlias_m<FCVT_S_LU, "fcvt.s.lu", FXIN64X>;
+defm           : FPUnaryOpDynFrmAlias_m<FCVT_S_LU, "fcvt.s.lu", [XF_64]>;
 
 //===----------------------------------------------------------------------===//
 // Assembler Pseudo Instructions (User-Level ISA, Version 2.2, Chapter 20)
@@ -441,16 +414,6 @@ def PseudoQuietFLE_S : PseudoQuietFCMP<FPR32>;
 def PseudoQuietFLT_S : PseudoQuietFCMP<FPR32>;
 }
 } // Predicates = [HasStdExtF]
-
-let Predicates = [HasStdExtZfinx] in {
-def : InstAlias<"fabs.s $rd, $rs", (FSGNJX_S_INX FPR32INX:$rd, FPR32INX:$rs, FPR32INX:$rs)>;
-def : InstAlias<"fneg.s $rd, $rs", (FSGNJN_S_INX FPR32INX:$rd, FPR32INX:$rs, FPR32INX:$rs)>;
-
-def : InstAlias<"fgt.s $rd, $rs, $rt",
-                (FLT_S_INX GPR:$rd, FPR32INX:$rt, FPR32INX:$rs), 0>;
-def : InstAlias<"fge.s $rd, $rs, $rt",
-                (FLE_S_INX GPR:$rd, FPR32INX:$rt, FPR32INX:$rs), 0>;
-} // Predicates = [HasStdExtZfinx]
 
 //===----------------------------------------------------------------------===//
 // Pseudo-instructions and codegen patterns
