@@ -581,8 +581,8 @@ def : Pat<(i64 (any_llround FPR32:$rs1)), (FCVT_L_S $rs1, 0b100)>;
 // [u]int->fp. Match GCC and default to using dynamic rounding mode.
 def : Pat<(any_sint_to_fp (i64 (sexti32 (i64 GPR:$rs1)))), (FCVT_S_W $rs1, 0b111)>;
 def : Pat<(any_uint_to_fp (i64 (zexti32 (i64 GPR:$rs1)))), (FCVT_S_WU $rs1, 0b111)>;
-// the next line wouldnt compile, said no patterns found. I figure one of you guys
+// the next two lines wouldnt compile, said no patterns found. I figure one of you guys
 // at PR time will know why this is :) (or maybe I will figure it out in the meantime)
 // def : Pat<(any_sint_to_fp (i64 GPR:$rs1)), (FCVT_S_L $rs1, 0b111)>;
-def : Pat<(any_uint_to_fp (i64 GPR:$rs1)), (FCVT_S_LU $rs1, 0b111)>;
+// def : Pat<(any_uint_to_fp (i64 GPR:$rs1)), (FCVT_S_LU $rs1, 0b111)>;
 } // Predicates = [HasStdExtF, IsRV64]
