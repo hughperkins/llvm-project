@@ -92,6 +92,8 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
     addRegisterClass(MVT::f32, &RISCV::FPR32RegClass);
   if (Subtarget.hasStdExtD())
     addRegisterClass(MVT::f64, &RISCV::FPR64RegClass);
+  if (Subtarget.hasStdExtZfinx())
+    addRegisterClass(MVT::f32, &RISCV::GPRF32RegClass);
 
   static const MVT::SimpleValueType BoolVecVTs[] = {
       MVT::nxv1i1,  MVT::nxv2i1,  MVT::nxv4i1, MVT::nxv8i1,
@@ -379,7 +381,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::FPOWI, MVT::i32, Custom);
   }
 
-  if (Subtarget.hasStdExtF()) {
+  if (Subtarget.hasStdExtF() || Subtarget.hasStdExtZfinx()) {
     for (auto NT : FPLegalNodeTypes)
       setOperationAction(NT, MVT::f32, Legal);
     for (auto CC : FPCCToExpand)
@@ -1354,7 +1356,7 @@ bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
   // FIXME: Change to Zfhmin once f16 becomes a legal type with Zfhmin.
   if (VT == MVT::f16 && !Subtarget.hasStdExtZfh())
     return false;
-  if (VT == MVT::f32 && !Subtarget.hasStdExtF())
+  if (VT == MVT::f32 && !Subtarget.hasStdExtF() && !Subtarget.hasStdExtZfinx())
     return false;
   if (VT == MVT::f64 && !Subtarget.hasStdExtD())
     return false;
@@ -1363,7 +1365,8 @@ bool RISCVTargetLowering::isFPImmLegal(const APFloat &Imm, EVT VT,
 
 bool RISCVTargetLowering::hasBitPreservingFPLogic(EVT VT) const {
   return (VT == MVT::f16 && Subtarget.hasStdExtZfh()) ||
-         (VT == MVT::f32 && Subtarget.hasStdExtF()) ||
+         (VT == MVT::f32 &&
+          (Subtarget.hasStdExtF() || Subtarget.hasStdExtZfinx())) ||
          (VT == MVT::f64 && Subtarget.hasStdExtD());
 }
 
@@ -11514,7 +11517,7 @@ bool RISCVTargetLowering::shouldConvertFpToSat(unsigned Op, EVT FPVT,
   case MVT::f16:
     return Subtarget.hasStdExtZfh();
   case MVT::f32:
-    return Subtarget.hasStdExtF();
+    return Subtarget.hasStdExtF() || Subtarget.hasStdExtZfinx();
   case MVT::f64:
     return Subtarget.hasStdExtD();
   default:
@@ -11551,7 +11554,7 @@ bool RISCVTargetLowering::isFMAFasterThanFMulAndFAdd(const MachineFunction &MF,
   case MVT::f16:
     return Subtarget.hasStdExtZfh();
   case MVT::f32:
-    return Subtarget.hasStdExtF();
+    return Subtarget.hasStdExtF() || Subtarget.hasStdExtZfinx();
   case MVT::f64:
     return Subtarget.hasStdExtD();
   default:

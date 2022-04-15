@@ -3,6 +3,10 @@
 ; RUN:   -target-abi=ilp32f | FileCheck -check-prefix=RV32IF %s
 ; RUN: llc -mtriple=riscv64 -mattr=+f -verify-machineinstrs < %s \
 ; RUN:   -target-abi=lp64f | FileCheck -check-prefix=RV64IF %s
+; RUN: llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs < %s \
+; RUN:   -target-abi=ilp32 | FileCheck -check-prefix=RV32IZFINX %s
+; RUN: llc -mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs < %s \
+; RUN:   -target-abi=lp64 | FileCheck -check-prefix=RV64IZFINX %s
 ; RUN: llc -mtriple=riscv32 -verify-machineinstrs < %s \
 ; RUN:   | FileCheck -check-prefix=RV32I %s
 ; RUN: llc -mtriple=riscv64 -verify-machineinstrs < %s \
@@ -23,6 +27,16 @@ define float @fadd_s(float %a, float %b) nounwind {
 ; RV64IF:       # %bb.0:
 ; RV64IF-NEXT:    fadd.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fadd_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fadd_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fadd_s:
 ; RV32I:       # %bb.0:
@@ -56,6 +70,16 @@ define float @fsub_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fsub.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fsub_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fsub.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fsub_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fsub.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fsub_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -88,6 +112,16 @@ define float @fmul_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fmul.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fmul_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fmul.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmul_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fmul.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fmul_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -119,6 +153,16 @@ define float @fdiv_s(float %a, float %b) nounwind {
 ; RV64IF:       # %bb.0:
 ; RV64IF-NEXT:    fdiv.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fdiv_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fdiv.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fdiv_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fdiv.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fdiv_s:
 ; RV32I:       # %bb.0:
@@ -154,6 +198,16 @@ define float @fsqrt_s(float %a) nounwind {
 ; RV64IF-NEXT:    fsqrt.s fa0, fa0
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fsqrt_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fsqrt.s a0, a0
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fsqrt_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fsqrt.s a0, a0
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fsqrt_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -187,6 +241,16 @@ define float @fsgnj_s(float %a, float %b) nounwind {
 ; RV64IF:       # %bb.0:
 ; RV64IF-NEXT:    fsgnj.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fsgnj_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fsgnj.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fsgnj_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fsgnj.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fsgnj_s:
 ; RV32I:       # %bb.0:
@@ -225,6 +289,20 @@ define i32 @fneg_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fneg.s ft1, ft0
 ; RV64IF-NEXT:    feq.s a0, ft0, ft1
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fneg_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, a0
+; RV32IZFINX-NEXT:    fneg.s a1, a0
+; RV32IZFINX-NEXT:    feq.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fneg_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, a0
+; RV64IZFINX-NEXT:    fneg.s a1, a0
+; RV64IZFINX-NEXT:    feq.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fneg_s:
 ; RV32I:       # %bb.0:
@@ -274,6 +352,18 @@ define float @fsgnjn_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa0, fa1
 ; RV64IF-NEXT:    fsgnjn.s fa0, fa0, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fsgnjn_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a1, a0, a1
+; RV32IZFINX-NEXT:    fsgnjn.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fsgnjn_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a1, a0, a1
+; RV64IZFINX-NEXT:    fsgnjn.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fsgnjn_s:
 ; RV32I:       # %bb.0:
@@ -335,6 +425,20 @@ define float @fabs_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fadd.s fa0, ft1, ft0
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fabs_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV32IZFINX-NEXT:    fabs.s a1, a0
+; RV32IZFINX-NEXT:    fadd.s a0, a1, a0
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fabs_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV64IZFINX-NEXT:    fabs.s a1, a0
+; RV64IZFINX-NEXT:    fadd.s a0, a1, a0
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fabs_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -379,6 +483,16 @@ define float @fmin_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fmin.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fmin_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fmin.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmin_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fmin.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fmin_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -413,6 +527,16 @@ define float @fmax_s(float %a, float %b) nounwind {
 ; RV64IF-NEXT:    fmax.s fa0, fa0, fa1
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fmax_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fmax.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmax_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fmax.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fmax_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -446,6 +570,16 @@ define float @fmadd_s(float %a, float %b, float %c) nounwind {
 ; RV64IF:       # %bb.0:
 ; RV64IF-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fmadd_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fmadd.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmadd_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fmadd.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fmadd_s:
 ; RV32I:       # %bb.0:
@@ -482,6 +616,18 @@ define float @fmsub_s(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa2, ft0
 ; RV64IF-NEXT:    fmsub.s fa0, fa0, fa1, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fmsub_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV32IZFINX-NEXT:    fmsub.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmsub_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV64IZFINX-NEXT:    fmsub.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fmsub_s:
 ; RV32I:       # %bb.0:
@@ -548,6 +694,20 @@ define float @fnmadd_s(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa2, ft0
 ; RV64IF-NEXT:    fnmadd.s fa0, ft1, fa1, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fnmadd_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV32IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV32IZFINX-NEXT:    fnmadd.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmadd_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV64IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV64IZFINX-NEXT:    fnmadd.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fnmadd_s:
 ; RV32I:       # %bb.0:
@@ -629,6 +789,20 @@ define float @fnmadd_s_2(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fnmadd.s fa0, ft1, fa0, ft0
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fnmadd_s_2:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV32IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV32IZFINX-NEXT:    fnmadd.s a0, a1, a0, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmadd_s_2:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV64IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV64IZFINX-NEXT:    fnmadd.s a0, a1, a0, a2
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fnmadd_s_2:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -707,6 +881,18 @@ define float @fnmsub_s(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fnmsub.s fa0, ft0, fa1, fa2
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fnmsub_s:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV32IZFINX-NEXT:    fnmsub.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmsub_s:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV64IZFINX-NEXT:    fnmsub.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fnmsub_s:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -769,6 +955,18 @@ define float @fnmsub_s_2(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fnmsub.s fa0, ft0, fa0, fa2
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fnmsub_s_2:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV32IZFINX-NEXT:    fnmsub.s a0, a1, a0, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmsub_s_2:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV64IZFINX-NEXT:    fnmsub.s a0, a1, a0, a2
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fnmsub_s_2:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -829,6 +1027,16 @@ define float @fmadd_s_contract(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fmadd.s fa0, fa0, fa1, fa2
 ; RV64IF-NEXT:    ret
 ;
+; RV32IZFINX-LABEL: fmadd_s_contract:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fmadd.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmadd_s_contract:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fmadd.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
+;
 ; RV32I-LABEL: fmadd_s_contract:
 ; RV32I:       # %bb.0:
 ; RV32I-NEXT:    addi sp, sp, -16
@@ -875,6 +1083,18 @@ define float @fmsub_s_contract(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa2, ft0
 ; RV64IF-NEXT:    fmsub.s fa0, fa0, fa1, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fmsub_s_contract:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV32IZFINX-NEXT:    fmsub.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fmsub_s_contract:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV64IZFINX-NEXT:    fmsub.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fmsub_s_contract:
 ; RV32I:       # %bb.0:
@@ -949,6 +1169,22 @@ define float @fnmadd_s_contract(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa2, ft0
 ; RV64IF-NEXT:    fnmadd.s fa0, ft1, ft2, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fnmadd_s_contract:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV32IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV32IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV32IZFINX-NEXT:    fnmadd.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmadd_s_contract:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV64IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV64IZFINX-NEXT:    fadd.s a2, a2, zero
+; RV64IZFINX-NEXT:    fnmadd.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fnmadd_s_contract:
 ; RV32I:       # %bb.0:
@@ -1042,6 +1278,20 @@ define float @fnmsub_s_contract(float %a, float %b, float %c) nounwind {
 ; RV64IF-NEXT:    fadd.s ft0, fa1, ft0
 ; RV64IF-NEXT:    fnmsub.s fa0, ft1, ft0, fa2
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: fnmsub_s_contract:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV32IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV32IZFINX-NEXT:    fnmsub.s a0, a0, a1, a2
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: fnmsub_s_contract:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    fadd.s a0, a0, zero
+; RV64IZFINX-NEXT:    fadd.s a1, a1, zero
+; RV64IZFINX-NEXT:    fnmsub.s a0, a0, a1, a2
+; RV64IZFINX-NEXT:    ret
 ;
 ; RV32I-LABEL: fnmsub_s_contract:
 ; RV32I:       # %bb.0:

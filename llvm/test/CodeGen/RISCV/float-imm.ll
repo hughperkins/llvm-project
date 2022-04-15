@@ -3,6 +3,10 @@
 ; RUN:   -target-abi=ilp32f | FileCheck -check-prefix=RV32IF %s
 ; RUN: llc -mtriple=riscv64 -mattr=+f -verify-machineinstrs < %s \
 ; RUN:   -target-abi=lp64f | FileCheck -check-prefix=RV64IF %s
+; RUN: llc -mtriple=riscv32 -mattr=+zfinx -verify-machineinstrs < %s \
+; RUN:   -target-abi=ilp32 | FileCheck -check-prefix=RV32IZFINX %s
+; RUN: llc -mtriple=riscv64 -mattr=+zfinx -verify-machineinstrs < %s \
+; RUN:   -target-abi=lp64 | FileCheck -check-prefix=RV64IZFINX %s
 
 ; TODO: constant pool shouldn't be necessary for RV64IF.
 define float @float_imm() nounwind {
@@ -17,6 +21,18 @@ define float @float_imm() nounwind {
 ; RV64IF-NEXT:    lui a0, %hi(.LCPI0_0)
 ; RV64IF-NEXT:    flw fa0, %lo(.LCPI0_0)(a0)
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: float_imm:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    lui a0, 263313
+; RV32IZFINX-NEXT:    addi a0, a0, -37
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: float_imm:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    lui a0, %hi(.LCPI0_0)
+; RV64IZFINX-NEXT:    lw a0, %lo(.LCPI0_0)(a0)
+; RV64IZFINX-NEXT:    ret
   ret float 3.14159274101257324218750
 }
 
@@ -34,6 +50,20 @@ define float @float_imm_op(float %a) nounwind {
 ; RV64IF-NEXT:    flw ft0, %lo(.LCPI1_0)(a0)
 ; RV64IF-NEXT:    fadd.s fa0, fa0, ft0
 ; RV64IF-NEXT:    ret
+;
+; RV32IZFINX-LABEL: float_imm_op:
+; RV32IZFINX:       # %bb.0:
+; RV32IZFINX-NEXT:    lui a1, %hi(.LCPI1_0)
+; RV32IZFINX-NEXT:    lw a1, %lo(.LCPI1_0)(a1)
+; RV32IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV32IZFINX-NEXT:    ret
+;
+; RV64IZFINX-LABEL: float_imm_op:
+; RV64IZFINX:       # %bb.0:
+; RV64IZFINX-NEXT:    lui a1, %hi(.LCPI1_0)
+; RV64IZFINX-NEXT:    lw a1, %lo(.LCPI1_0)(a1)
+; RV64IZFINX-NEXT:    fadd.s a0, a0, a1
+; RV64IZFINX-NEXT:    ret
   %1 = fadd float %a, 1.0
   ret float %1
 }
